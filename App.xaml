@@ -1,0 +1,12 @@
+<Application x:Class="DynamicIslandMedia.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <!-- Application-wide resources and font styling -->
+        <FontFamily x:Key="SegoeUIVariable">Segoe UI Variable Display, Segoe UI, sans-serif</FontFamily>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource SegoeUIVariable}"/>
+        </Style>
+    </Application.Resources>
+</Application>
