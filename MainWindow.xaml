@@ -199,7 +199,7 @@
 				Width="240"
 				Height="38"
 				CornerRadius="19"
-				Background="#0D0D11"
+				Background="#B30D0D11"
 				VerticalAlignment="Bottom"
 				Margin="0,0,0,40"
 				IsHitTestVisible="False">
@@ -216,7 +216,7 @@
 				Width="240"
 				Height="38"
 				CornerRadius="19"
-				Background="#0D0D11"
+				Background="#B30D0D11"
 				BorderBrush="#2A2A35"
 				BorderThickness="1"
 				VerticalAlignment="Bottom"
