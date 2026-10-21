@@ -178,6 +178,7 @@
 		</ResourceDictionary>
 	</FrameworkElement.Resources>
 	<Grid
+		Name="IslandRootGrid"
 		HorizontalAlignment="Center"
 		VerticalAlignment="Bottom">
 		<Grid
@@ -190,6 +191,7 @@
 			MouseLeave="IslandHitBox_MouseLeave"
 			MouseLeftButtonDown="IslandHitBox_MouseLeftButtonDown">
 			<Border
+				Name="BottomHoverBuffer"
 				Height="40"
 				VerticalAlignment="Bottom"
 				Background="#00000000"

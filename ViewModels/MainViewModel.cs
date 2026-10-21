@@ -23,7 +23,8 @@ namespace DynamicIslandMedia.ViewModels
         private bool _isPinned;
         private bool _isVisible = false;
         private bool _isMasterEnabled = true;
-        private double _bottomMargin = AppSettings.DefaultBottomMargin;
+        private string _islandPosition = AppSettings.PositionBottom;
+        private double _edgeDistance = AppSettings.DefaultEdgeDistance;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -31,7 +32,8 @@ namespace DynamicIslandMedia.ViewModels
         {
             _mediaService = mediaService;
             _settings = settings;
-            _bottomMargin = _settings.BottomMargin;
+            _islandPosition = _settings.IslandPosition;
+            _edgeDistance = _settings.EdgeDistance;
             _isMasterEnabled = _settings.IsMasterEnabled;
 
             _collapseTimer = new DispatcherTimer
@@ -210,19 +212,68 @@ namespace DynamicIslandMedia.ViewModels
             }
         }
 
-        public double BottomMargin
+        public string IslandPosition
         {
-            get => _bottomMargin;
+            get => _islandPosition;
             set
             {
-                if (Math.Abs(_bottomMargin - value) > 0.01)
+                var normalized = string.Equals(value, "Top", StringComparison.OrdinalIgnoreCase) ? "Top" : "Bottom";
+                if (_islandPosition != normalized)
                 {
-                    _bottomMargin = value;
-                    _settings.BottomMargin = value;
+                    _islandPosition = normalized;
+                    _settings.IslandPosition = normalized;
                     _settings.Save();
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(DistanceLabelText));
+                    OnPropertyChanged(nameof(IsTopPosition));
+                    OnPropertyChanged(nameof(IsBottomPosition));
                 }
             }
+        }
+
+        public bool IsTopPosition
+        {
+            get => string.Equals(_islandPosition, "Top", StringComparison.OrdinalIgnoreCase);
+            set
+            {
+                if (value) IslandPosition = "Top";
+            }
+        }
+
+        public bool IsBottomPosition
+        {
+            get => !IsTopPosition;
+            set
+            {
+                if (value) IslandPosition = "Bottom";
+            }
+        }
+
+        public string DistanceLabelText =>
+            string.Equals(IslandPosition, "Top", StringComparison.OrdinalIgnoreCase)
+                ? "Distance from Top Screen Edge:"
+                : "Distance from Bottom Screen Edge:";
+
+        public double EdgeDistance
+        {
+            get => _edgeDistance;
+            set
+            {
+                if (Math.Abs(_edgeDistance - value) > 0.01)
+                {
+                    _edgeDistance = value;
+                    _settings.EdgeDistance = value;
+                    _settings.Save();
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(BottomMargin));
+                }
+            }
+        }
+
+        public double BottomMargin
+        {
+            get => EdgeDistance;
+            set => EdgeDistance = value;
         }
 
         public bool HasMedia => CurrentMedia.HasMedia;

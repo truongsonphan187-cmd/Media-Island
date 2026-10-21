@@ -94,18 +94,87 @@ namespace DynamicIslandMedia
 			this.UpdateProgressFill();
 		}
 
+		private void UpdateIslandAlignment()
+		{
+			bool isTop = string.Equals(this._viewModel.IslandPosition, "Top", StringComparison.OrdinalIgnoreCase);
+			if (isTop)
+			{
+				if (this.IslandRootGrid != null)
+				{
+					this.IslandRootGrid.VerticalAlignment = VerticalAlignment.Top;
+				}
+				if (this.IslandHitBox != null)
+				{
+					this.IslandHitBox.VerticalAlignment = VerticalAlignment.Top;
+					this.IslandHitBox.Margin = new Thickness(0, 16, 0, 0);
+				}
+				if (this.BottomHoverBuffer != null)
+				{
+					this.BottomHoverBuffer.Visibility = Visibility.Visible;
+					this.BottomHoverBuffer.Height = 40;
+					this.BottomHoverBuffer.VerticalAlignment = VerticalAlignment.Top;
+				}
+				if (this.ShadowBorder != null)
+				{
+					this.ShadowBorder.VerticalAlignment = VerticalAlignment.Top;
+					this.ShadowBorder.Margin = new Thickness(0, 40, 0, 0);
+				}
+				if (this.IslandBorder != null)
+				{
+					this.IslandBorder.VerticalAlignment = VerticalAlignment.Top;
+					this.IslandBorder.Margin = new Thickness(0, 40, 0, 0);
+				}
+			}
+			else
+			{
+				if (this.IslandRootGrid != null)
+				{
+					this.IslandRootGrid.VerticalAlignment = VerticalAlignment.Bottom;
+				}
+				if (this.IslandHitBox != null)
+				{
+					this.IslandHitBox.VerticalAlignment = VerticalAlignment.Bottom;
+					this.IslandHitBox.Margin = new Thickness(0, 0, 0, 16);
+				}
+				if (this.BottomHoverBuffer != null)
+				{
+					this.BottomHoverBuffer.Visibility = Visibility.Visible;
+					this.BottomHoverBuffer.Height = 40;
+					this.BottomHoverBuffer.VerticalAlignment = VerticalAlignment.Bottom;
+				}
+				if (this.ShadowBorder != null)
+				{
+					this.ShadowBorder.VerticalAlignment = VerticalAlignment.Bottom;
+					this.ShadowBorder.Margin = new Thickness(0, 0, 0, 40);
+				}
+				if (this.IslandBorder != null)
+				{
+					this.IslandBorder.VerticalAlignment = VerticalAlignment.Bottom;
+					this.IslandBorder.Margin = new Thickness(0, 0, 0, 40);
+				}
+			}
+		}
+
 		public void RepositionWindow()
 		{
+			this.UpdateIslandAlignment();
 			Rect workArea = SystemParameters.WorkArea;
 			base.Left = workArea.Left + (workArea.Width - base.Width) / 2.0;
-			base.Top = workArea.Bottom - this._viewModel.BottomMargin - (base.Height - 56.0);
+			if (string.Equals(this._viewModel.IslandPosition, "Top", StringComparison.OrdinalIgnoreCase))
+			{
+				base.Top = workArea.Top + this._viewModel.EdgeDistance - IslandTopPadding;
+			}
+			else
+			{
+				base.Top = workArea.Bottom - this._viewModel.EdgeDistance - (base.Height - IslandBottomPadding);
+			}
 		}
 
 		private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 		{
 			base.Dispatcher.Invoke(delegate()
 			{
-				string propertyName = e.PropertyName;
+				string? propertyName = e.PropertyName;
 				if (propertyName == "IsExpanded")
 				{
 					this.AnimateIslandState(this._viewModel.IsExpanded);
@@ -121,7 +190,7 @@ namespace DynamicIslandMedia
 					this.UpdateVisibility(this._viewModel.IsVisible);
 					return;
 				}
-				if (propertyName == "BottomMargin")
+				if (propertyName == "EdgeDistance" || propertyName == "BottomMargin" || propertyName == "IslandPosition")
 				{
 					this.RepositionWindow();
 					return;
@@ -391,5 +460,6 @@ namespace DynamicIslandMedia
 		private const int GWL_EXSTYLE = -20;
 		private const int WS_EX_TOOLWINDOW = 128;
 		public const double IslandBottomPadding = 56.0;
+		public const double IslandTopPadding = 56.0;
 	}
 }

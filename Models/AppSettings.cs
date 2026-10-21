@@ -8,9 +8,35 @@ namespace DynamicIslandMedia.Models
 {
     public class AppSettings
     {
-        public const double DefaultBottomMargin = 7.6; // Exactly 1/5 (20%) of collapsed height (38px)
+        public const double DefaultEdgeDistance = 8.0;
+        public const double DefaultBottomMargin = DefaultEdgeDistance;
+        public const string PositionBottom = "Bottom";
+        public const string PositionTop = "Top";
 
-        public double BottomMargin { get; set; } = DefaultBottomMargin;
+        public string IslandPosition { get; set; } = PositionBottom;
+        public double EdgeDistance { get; set; } = DefaultEdgeDistance;
+
+        // Backward compatibility: alias BottomMargin to EdgeDistance for existing saved settings
+        [JsonPropertyName("BottomMargin")]
+        public double? LegacyBottomMargin
+        {
+            get => null;
+            set
+            {
+                if (value.HasValue && EdgeDistance == DefaultEdgeDistance)
+                {
+                    EdgeDistance = value.Value;
+                }
+            }
+        }
+
+        [JsonIgnore]
+        public double BottomMargin
+        {
+            get => EdgeDistance;
+            set => EdgeDistance = value;
+        }
+
         public bool IsMasterEnabled { get; set; } = true;
         public bool AutoHideWhenIdle { get; set; } = false;
         public bool AutoExpandOnHover { get; set; } = true;
@@ -23,9 +49,9 @@ namespace DynamicIslandMedia.Models
             get => null;
             set
             {
-                if (value.HasValue && BottomMargin == DefaultBottomMargin)
+                if (value.HasValue && EdgeDistance == DefaultEdgeDistance)
                 {
-                    // keep DefaultBottomMargin as new standard
+                    // keep DefaultEdgeDistance
                 }
             }
         }

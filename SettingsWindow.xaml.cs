@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Input;
 using DynamicIslandMedia.Models;
@@ -9,18 +10,39 @@ namespace DynamicIslandMedia
     {
         private readonly MainViewModel _viewModel;
         private readonly AppSettings _settings;
+        private bool _isInitializing;
 
         public SettingsWindow(MainViewModel viewModel)
         {
             InitializeComponent();
             _viewModel = viewModel;
             _settings = viewModel.Settings;
+            DataContext = viewModel;
 
-            // Load values
-            BottomMarginSlider.Value = _settings.BottomMargin;
-            AutoExpandCheckBox.IsChecked = _settings.AutoExpandOnHover;
-            AutoHideCheckBox.IsChecked = _settings.AutoHideWhenIdle;
-            StartWithWindowsCheckBox.IsChecked = _settings.StartWithWindows;
+            _isInitializing = true;
+            try
+            {
+                // Load values
+                if (string.Equals(_settings.IslandPosition, AppSettings.PositionTop, StringComparison.OrdinalIgnoreCase))
+                {
+                    TopPositionRadio.IsChecked = true;
+                }
+                else
+                {
+                    BottomPositionRadio.IsChecked = true;
+                }
+
+                BottomMarginSlider.Value = _settings.EdgeDistance;
+                AutoExpandCheckBox.IsChecked = _settings.AutoExpandOnHover;
+                AutoHideCheckBox.IsChecked = _settings.AutoHideWhenIdle;
+                StartWithWindowsCheckBox.IsChecked = _settings.StartWithWindows;
+
+                UpdateDistanceLabel();
+            }
+            finally
+            {
+                _isInitializing = false;
+            }
         }
 
         private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -36,23 +58,50 @@ namespace DynamicIslandMedia
             Close();
         }
 
+        private void PositionRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (_isInitializing) return;
+            UpdateDistanceLabel();
+            _viewModel.IslandPosition = (TopPositionRadio?.IsChecked == true) ? AppSettings.PositionTop : AppSettings.PositionBottom;
+        }
+
+        private void BottomMarginSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_isInitializing) return;
+            _viewModel.EdgeDistance = e.NewValue;
+        }
+
+        private void UpdateDistanceLabel()
+        {
+            if (DistanceLabel == null) return;
+            DistanceLabel.Text = (TopPositionRadio?.IsChecked == true)
+                ? "Distance from Top Screen Edge:"
+                : "Distance from Bottom Screen Edge:";
+        }
+
         private void ResetButton_Click(object sender, RoutedEventArgs e)
         {
-            BottomMarginSlider.Value = AppSettings.DefaultBottomMargin;
+            BottomPositionRadio.IsChecked = true;
+            _viewModel.IslandPosition = AppSettings.PositionBottom;
+            BottomMarginSlider.Value = AppSettings.DefaultEdgeDistance;
+            _viewModel.EdgeDistance = AppSettings.DefaultEdgeDistance;
             AutoExpandCheckBox.IsChecked = true;
             AutoHideCheckBox.IsChecked = false;
             StartWithWindowsCheckBox.IsChecked = false;
+            UpdateDistanceLabel();
         }
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
-            _settings.BottomMargin = BottomMarginSlider.Value;
+            _settings.IslandPosition = (TopPositionRadio.IsChecked == true) ? AppSettings.PositionTop : AppSettings.PositionBottom;
+            _settings.EdgeDistance = BottomMarginSlider.Value;
             _settings.AutoExpandOnHover = AutoExpandCheckBox.IsChecked ?? true;
             _settings.AutoHideWhenIdle = AutoHideCheckBox.IsChecked ?? false;
             _settings.StartWithWindows = StartWithWindowsCheckBox.IsChecked ?? false;
 
             _settings.Save();
-            _viewModel.BottomMargin = _settings.BottomMargin;
+            _viewModel.IslandPosition = _settings.IslandPosition;
+            _viewModel.EdgeDistance = _settings.EdgeDistance;
             _viewModel.UpdatePresenceVisibility();
 
             Close();
